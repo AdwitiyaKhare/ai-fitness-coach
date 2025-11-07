@@ -1,8 +1,8 @@
 // lib/promptTemplate.ts
 export const generatePrompt = (user: any) => {
   return `
-You are an expert fitness coach and dietitian.
-Generate a personalized 7-day workout and diet plan in strict JSON only.
+You are an expert certified fitness coach and nutritionist. 
+Return a JSON object only — do NOT include markdown or extra text.
 
 Schema:
 {
@@ -26,7 +26,7 @@ Schema:
   "motivation": string
 }
 
-User details:
+Now generate a personalized 7-day plan for:
 Name: ${user.name}
 Age: ${user.age}
 Gender: ${user.gender}
@@ -38,5 +38,5 @@ Workout Location: ${user.location}
 Diet Preference: ${user.diet}
 Medical Notes: ${user.medical || "None"}
 
-Generate the plan as valid JSON, no extra text.`;
+Only respond with valid JSON strictly matching the schema.`;
 };
