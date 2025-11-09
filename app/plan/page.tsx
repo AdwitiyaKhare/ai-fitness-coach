@@ -1,18 +1,25 @@
 "use client";
-import { useEffect, useState } from "react";
-import AudioPlayer from "@/components/AudioPlayer";
-import PDFExportButton from "@/components/PDFExportButton";
-import ImageGenerator from "@/components/ImageGenerator";
-import ThemeToggle from "@/components/ThemeToggle";
 
+import { useEffect, useState } from "react";
+import PDFExportButton from "@/components/PDFExportButton";
+import PlanDisplay from "@/components/PlanDisplay";
+
+/**
+ * The PlanPage component displays the user’s personalized AI-generated fitness plan.
+ * It retrieves the plan data from localStorage, renders it in a formatted view,
+ * and provides an option to listen to the plan narration or export it as a PDF.
+ */
 export default function PlanPage() {
   const [plan, setPlan] = useState<any>(null);
 
+  // Load the saved AI-generated plan from localStorage when the page is first rendered.
+  // This ensures the user can revisit their generated plan without regenerating it.
   useEffect(() => {
     const stored = localStorage.getItem("aiPlan");
     if (stored) setPlan(JSON.parse(stored));
   }, []);
 
+  // If no plan exists in localStorage, show a user-friendly fallback message.
   if (!plan)
     return (
       <p className="text-center mt-10">
@@ -20,76 +27,62 @@ export default function PlanPage() {
       </p>
     );
 
+  /**
+   * Construct a complete narration string that will be used by the AudioPlayer component.
+   * This text includes a spoken summary of the user’s workout plan, diet plan, tips, and motivation.
+   */
+  const narrationText = `
+Hi ${
+    plan.name
+  }, this is your personalized AI fitness plan to help you achieve your goal of ${
+    plan.fitness_goal
+  }.
+
+Workout Plan:
+${plan.workout_plan
+  .map(
+    (day: any) =>
+      `On ${day.day}, you will perform: ${day.exercises
+        .map(
+          (ex: any) =>
+            `${ex.name}, ${ex.sets} sets of ${ex.reps}, with ${ex.rest} rest`
+        )
+        .join("; ")}.`
+  )
+  .join("\n")}
+
+Diet Plan:
+${Object.entries(plan.diet_plan || {})
+  .map(
+    ([meal, items]: any) =>
+      `${meal.charAt(0).toUpperCase() + meal.slice(1)} includes ${items.join(
+        ", "
+      )}.`
+  )
+  .join("\n")}
+
+Tips:
+${
+  plan.tips?.join(". ") ||
+  "Stay consistent, stay hydrated, and maintain good posture."
+}
+
+Motivation:
+${plan.motivation || "Keep pushing forward — you’ve got this!"}
+`;
+
+  /**
+   * Render the fitness plan display section and the PDF export button.
+   * The PlanDisplay component is responsible for visualizing the plan data,
+   * while the PDFExportButton allows the user to save their plan as a downloadable file.
+   */
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6">
-      <ThemeToggle />
       <div id="plan-content" className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-2">
-          🏋️ Your AI Fitness Plan
-        </h1>
-        <h2 className="text-lg mb-4 text-center text-gray-500">
-          {plan.name} — {plan.fitness_goal}
-        </h2>
-
-        <AudioPlayer
-          text={`Here is your AI fitness plan for ${plan.name}. Your goal is ${plan.fitness_goal}.`}
-        />
-
-        <section className="space-y-4 mt-6">
-          {plan.workout_plan?.map((day: any, idx: number) => (
-            <div
-              key={idx}
-              className="border p-4 rounded-lg bg-white dark:bg-gray-800"
-            >
-              <h3 className="font-semibold mb-2">{day.day}</h3>
-              <ul className="list-disc ml-6">
-                {day.exercises.map((ex: any, i: number) => (
-                  <li key={i}>
-                    {ex.name} — {ex.sets} x {ex.reps} (Rest: {ex.rest})
-                    <ImageGenerator prompt={ex.name} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </section>
-
-        <section className="mt-8">
-          <h2 className="text-xl font-semibold mb-2">🥗 Diet Plan</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Object.entries(plan.diet_plan || {}).map(([meal, items]: any) => (
-              <div
-                key={meal}
-                className="bg-white dark:bg-gray-800 p-3 rounded-lg"
-              >
-                <h4 className="font-semibold capitalize">{meal}</h4>
-                <ul className="list-disc ml-5 text-sm">
-                  {items.map((item: string, idx: number) => (
-                    <li key={idx}>
-                      {item}
-                      <ImageGenerator prompt={item} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-8">
-          <h2 className="text-xl font-semibold mb-2">💡 Tips</h2>
-          <ul className="list-disc ml-6">
-            {plan.tips?.map((t: string, i: number) => (
-              <li key={i}>{t}</li>
-            ))}
-          </ul>
-          <p className="italic mt-3 text-center text-green-600">
-            {plan.motivation}
-          </p>
-        </section>
+        <PlanDisplay plan={plan} narrationText={narrationText} />
       </div>
 
-      <div className="flex justify-center mt-6">
+      <div className="flex justify-center mt-8">
         <PDFExportButton />
       </div>
     </div>

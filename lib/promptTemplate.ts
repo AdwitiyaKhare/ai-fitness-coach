@@ -1,4 +1,21 @@
-// lib/promptTemplate.ts
+/**
+ * generatePrompt
+ *
+ * This utility function dynamically creates a text prompt for the language model
+ * to generate a personalized fitness and diet plan.
+ *
+ * It formats the user’s input data into a structured instruction for the AI model,
+ * ensuring the response follows a strict JSON schema (no markdown or extra text).
+ *
+ * The generated prompt includes both the schema definition and the user’s details.
+ * This consistent structure helps guide the model to produce valid, parsable JSON output.
+ *
+ * Parameters:
+ *  - user: Object containing personal and fitness details (name, age, goal, etc.)
+ *
+ * Returns:
+ *  - A string prompt ready to be passed to the model inference API.
+ */
 export const generatePrompt = (user: any) => {
   return `
 You are an expert certified fitness coach and nutritionist. 
